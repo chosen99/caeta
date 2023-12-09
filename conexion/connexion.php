@@ -82,6 +82,16 @@ class con_dinamic_db{
         $this->num_rows = $resultado->num_rows;
         $this->cierraconexion();
     }
+    public function selectASSOC_ALL(string $query){
+        $this->abreconexion();
+        // Creamos una consulta SQL
+        $resultado = $this->conexion->query($query);
+        // Creamos un array asociativo que contendrá toda la información que estamos demandando de la mase de datos.
+        $this->assoc = $resultado->fetch_all(MYSQLI_ASSOC);
+        // Creamos dato extra para enviar el numero de rows obtenidos.
+        $this->num_rows = $resultado->num_rows;
+        $this->cierraconexion();
+    }
 
     public function selectAssocArrayCURP(string $query){
         $this->abreconexion();

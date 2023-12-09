@@ -37,8 +37,29 @@ function getplantel(p){
     }).then(res => res.json())
         .then(res => {
             if (res === 1){
-                $("#nu").css("display", "block")
-                $("#alumnos").DataTable({
+                $("#nu").css("display", "block");
+                $('#alumnos thead tr').clone(true).appendTo('#alumnos thead');
+                $('#alumnos thead tr:eq(1) th').each(function (i) {
+                    let title = $(this).text();
+                    if(title === "" || title === "ACCIONES" || title === "NOMBRE"){
+                        $(this).html('<div></div>');
+                    } else {
+                        $(this).html('<input style="width: 100%; font-size: 8pt; border-radius: 10pt;" class="colorinput form-control text-center" type="text" placeholder="' + title + '" />');
+
+                    }
+                    // TODO Personalizar busquedas, No respeta acomodo por render. Usa programacion desde vistas solucion temp [i-1 -> i+1]
+                    $('input', this).on('keyup change', function () {
+                        // console.log(this.value);
+                        if (ta.column(i-1).search() !== this.value) {
+                            ta.column(i+1).search(this.value).draw();
+                        }else{
+                            ta.column(0).search(0).draw();
+                        }
+                    });
+                });
+                let ta = $("#alumnos").DataTable({
+                    orderCellsTop: true,
+                    fixedHeader: true,
                     language: {
                         url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
                     },
@@ -50,13 +71,16 @@ function getplantel(p){
                         {
                             targets: [0],
                             render: function (data, type, row){
-                                return '<input class="m-auto" type="checkbox" value="'+row[10]+'" name="seleciones[]">'
+                                return '<label class="switch">' +
+                                    '       <input class="m-auto seleciones" type="checkbox" value="'+row[10]+'" name="seleciones[]">' +
+                                    '       <span class="slider round"></span>' +
+                                    '   </label>'
                             }
                         },
                         {
                             targets: [1],
                             render: function (data, type, row){
-                                return '<div class="tooltip_foto"><span class="nombre_tabla'+row[10]+'">'+row[0]+' '+row[1]+' '+row[2]+'</span><span class="tooltiptext"><div class="row"><div class="col-6"><img src="https://images.freeimages.com/images/previews/ac9/railway-hdr-1361893.jpg" alt="foto-" width="100"></div><div class="col-6 text-start"><span style="font-size: 8pt;">Cel alumno: <span class="num1'+row[10]+'">'+row[11]+'</span><br>Cel padre 1: <span class="num2'+row[10]+'">'+row[12]+'</span><br>Cel padre 2: <span class="num3'+row[10]+'">'+row[13]+'</span></span></div></div></span></div>';
+                                return '<div class="tooltip_foto"><span class="nombre_tabla'+row[10]+'">'+row[0]+' '+row[1]+' '+row[2]+'</span><span class="tooltiptext"><div class="row"><div class="col-5"><img src="data:image/jpeg;base64,'+row[12]+'" alt="foto-" height="100"></div><div class="col-7 text-start"><span style="font-size: 8pt;">Cel alumno: <span class="num1'+row[10]+'">'+row[11]+'</span><br>Cel padre 1: <span class="num2'+row[10]+'">'+row[12]+'</span><br>Cel padre 2: <span class="num3'+row[10]+'">'+row[13]+'</span></span></div></div></span></div>';
                             }
                         },
                         {
@@ -129,9 +153,9 @@ function getplantel(p){
                             targets: [-1],
                             render: function (data, type, row){
                                 return '<button class="clase_edita" style="border: none; background: none;" value="'+row[10]+'" data-bs-toggle="modal" data-bs-target="#editar"><img src="../recursos/img/svg/edit.svg" alt="editar" width="32"></button>' +
-                                       '<span class="boton-p" data-bs-toggle="modal" data-bs-target="#foto"><img src="../recursos/img/svg/camera.svg" alt="foto" width="32"></span>' +
+                                       '<button class="id_ff" style="border: none; background: none;" value="'+row[10]+'" data-bs-toggle="modal" data-bs-target="#foto"><img src="../recursos/img/svg/camera.svg" alt="foto" width="32"></button>' +
                                        '<button class="clase_edita_codigo" style="border: none; background: none;" value="'+row[10]+'" data-bs-toggle="modal" data-bs-target="#editar-codigo"><img src="../recursos/img/svg/code.svg" alt="codigo" width="32"></button>' +
-                                       '<span class="boton-p" data-bs-toggle="modal" data-bs-target="#imprimir"><img src="../recursos/img/svg/print.svg" alt="impresion" width="32"></span>' +
+                                       '<button class="imprimir_individual" style="border: none; background: none;" value="'+row[10]+'"><img src="../recursos/img/svg/print.svg" alt="impresion" width="32"></button>' +
                                        '<span class="boton-p" data-bs-toggle="modal" data-bs-target="#CA">CA</span>' +
                                        '<span class="boton-p" data-bs-toggle="modal" data-bs-target="#eliminar"><img src="../recursos/img/svg/delete.svg" alt="eliminar" width="32"></span>'
                             }
@@ -224,8 +248,8 @@ $(document).on('click', '.clase_edita', function (){
             $("#Cel_alumno").val(res['alumno']['Cel_alumno']);
             $("#Cel_p1").val(res['alumno']['Cel_padre1']);
             $("#Cel_p2").val(res['alumno']['Cel_padre2']);
-            $("#get_fo").attr('src', res['alumno']['Foto']);
-            $("#get_fi").attr('src', res['alumno']['Firma']);
+            $("#get_fo").attr('src', 'data:image/jpeg;base64,'+res['alumno']['Foto']);
+            $("#get_fi").attr('src', 'data:image/png;base64,'+res['alumno']['Firma']);
             /*$("#get_fo").val(res['Foto']);
             $("#get_fi").val(res['Firma']);*/
         }
@@ -333,6 +357,86 @@ $(document).on('click', '.save_codes', function (){
     });
 });
 
+$(document).on('click', '.id_ff', function (){
+    $('.update_ff').val($(this).val());
+})
+
+$(document).on('click', '.update_ff', function (){
+    let form = new FormData();
+    alert($(this).val())
+    form.append('bandera', 'update_ff');
+    form.append('foto', $(".preview-recorte").prop('src'));
+    form.append('firma', $("#DatoBase64_2").val());
+    form.append('id', $(this).val());
+    fetch('./recurso.php',{
+        method: 'post',
+        mode: "no-cors",
+        body: form
+    }).then(res=>res.json()).then(res=>{
+        if (res==="save"){
+            Swal.fire({
+                icon: 'success',
+                showConfirmButton: false,
+                title: 'Se han actualizado foto y firma',
+                timer: 2000
+            });
+        }
+    });
+});
+$(document).on('click', '.imprimir_individual', function (){
+    let form = new FormData();
+    form.append('bandera','imprimir_individual');
+    form.append('id', $(this).val());
+    fetch('./recurso.php',{
+        method: 'post',
+        body: form,
+        mode: "no-cors"
+    }).then(res=>res.json()).then(res=>{
+        if (res==="Generando"){
+            Swal.fire({
+                icon: 'success',
+                showConfirmButton: false,
+                title: 'Descargando',
+                html: ''
+            });
+            downloadLink.click();
+        }
+    });
+});
+
+$(document).on('click','.imprimir-sel', function (){
+    let form = new FormData();
+    form.append('bandera', 'imprimir-sel')
+    let ids = $("#alumnos input:checkbox:checked").map(function(){
+        return $(this).val();
+    }).get();
+    if (ids.length===0){
+        Swal.fire({
+            title: '¿Deseas imprimir un grupo o todo el plantel?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Grupo',
+            denyButtonText: `Plantel`,
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                Swal.fire('Saved!', '', 'success')
+            } else if (result.isDenied) {
+                Swal.fire('Changes are not saved', '', 'info');
+            }
+        });
+    }
+    else if(ids.length>=2){
+        form.append('ids', ids)
+        impresiones(form);
+    }
+    else {
+        $('input:checkbox:checked').each(function() {
+            $(this).click()
+        });
+        Swal.fire('Impresión individual', 'Use la impresión individual para generar su credencial', 'info')
+    }
+});
 
 /*
 RETOMAR CAMARA
@@ -381,5 +485,22 @@ function update_carrera(grupo){
         body: form
     }).then(res => res.json()).then(res => {
         $("#Especialidad").val(res)
+    });
+}
+
+function impresiones(form){
+    Swal.fire('Generando', 'Creando credenciales', 'info')
+    fetch('./recurso.php',{
+        method: 'post',
+        mode: "no-cors",
+        body: form
+    }).then(res => res.json()).then(res => {
+        if (res==='generado'){
+            $('input:checkbox:checked').each(function() {
+                $(this).click()
+            });
+            Swal.fire('¡Éxito!', 'Credenciales generadas correctamente. Se descargaran en seguida', 'success')
+        }
+        downloadLinks.click();
     });
 }

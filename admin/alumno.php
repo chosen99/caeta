@@ -7,6 +7,7 @@ const PERSONAL_PATH = "./docente.php";
 const MENSAJE_PATH = "#";
 const ASISTENCIA_PATH = "#";
 include "../recursos/funciones/funcionesgenerales.php";
+//data:image/png;base64,
 if (isset($_SESSION['log'])) {
 ?>
     <!DOCTYPE html>
@@ -183,6 +184,65 @@ if (isset($_SESSION['log'])) {
 
             input[type=range]:focus::-ms-fill-upper {
                 background: #367ebd;
+            }
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 50px; /*60*/
+                height: 24px; /*34*/
+            }
+
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 16px; /**/
+                width: 16px; /**/
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+            input:checked + .slider {
+                background-color: #2196F3;
+            }
+
+            input:focus + .slider {
+                box-shadow: 0 0 1px #2196F3;
+            }
+
+            input:checked + .slider:before {
+                -webkit-transform: translateX(26px);
+                -ms-transform: translateX(26px);
+                transform: translateX(26px);
+            }
+
+            /* Rounded sliders */
+            .slider.round {
+                border-radius: 34px;
+            }
+
+            .slider.round:before {
+                border-radius: 50%;
             }
         </style>
         <style>
@@ -409,7 +469,7 @@ if (isset($_SESSION['log'])) {
                             </button>
                             <button class="btn btn-info d-inline-block" data-toggle="tooltip" data-bs-placement="top" title="Migración de alumnos">Migración
                             </button>
-                            <button class="btn btn-success d-inline-block" data-toggle="tooltip" data-bs-placement="top" title="Imprimir credenciales">Imprimir
+                            <button class="btn btn-success d-inline-block imprimir-sel" data-toggle="tooltip" data-bs-placement="top" title="Imprimir credenciales">Imprimir
                             </button>
                             <button class="btn btn-danger d-inline-block" data-toggle="tooltip" data-bs-placement="left" title="Eliminar alumnos">Eliminar
                             </button>
@@ -1226,7 +1286,7 @@ if (isset($_SESSION['log'])) {
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <button class="btn btn-success">GUARDAR DATOS</button>
+                                    <button class="btn btn-success update_ff">GUARDAR DATOS</button>
                                 </div>
                             </div>
                         </div>
@@ -1241,6 +1301,7 @@ if (isset($_SESSION['log'])) {
         <!-- Boton Eliminar FOTO -->
 
         <script src="https://unpkg.com/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.1.8/js/dataTables.fixedHeader.min.js"></script>
         <script src="../recursos/assets/js/cae.index.js?v=<?php echo rand() ?>"></script>
         <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
@@ -1344,7 +1405,7 @@ if (isset($_SESSION['log'])) {
                 } else {
                     if (obj.isSigned) {
                         //document.FORM1.DatoBase64.value += obj.imageData;
-                        DatoBase64.val('data:image/png;base64,' + obj.imageData);
+                        DatoBase64.val(obj.imageData);
                         estancia_firma.attr("src", 'data:image/png;base64,' + obj.imageData);
                         //document.FORM1.DatosTexto.value += obj.sigString;
                         DatosTexto.val(obj.sigString);
@@ -1505,6 +1566,17 @@ if (isset($_SESSION['log'])) {
                 };
                 startStream(updatedConstraints);
             */
+        </script>
+        <!-- CREDENCIALES -->
+        <script>
+            <!-- INDIVIDUAL -->
+            let downloadLink = document.createElement('a');
+            downloadLink.target = '_blank';
+            downloadLink.href = './temporales/credencial.pdf';
+            <!-- MULTIPLE -->
+            let downloadLinks = document.createElement('a');
+            downloadLinks.target = '_blank';
+            downloadLinks.href = './temporales/credenciales.pdf';
         </script>
     </body>
 
