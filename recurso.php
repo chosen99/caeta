@@ -19,3 +19,4 @@ if (!$token || $token !== $_SESSION['csrf_CAE']) {
         echo json_encode("error");
     }
 }
+// prueba
